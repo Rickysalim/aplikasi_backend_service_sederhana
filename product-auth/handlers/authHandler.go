@@ -19,7 +19,7 @@ func (h *AuthHandler) Login(response *gin.Context) {
 		response.JSON(http.StatusBadRequest, dto.WriteResponse(http.StatusBadRequest, err.Error(),nil, err))
 	} else {
 		if loginResponse, err := h.AuthService.Login(response, &loginRequest); err != nil {
-			response.JSON(http.StatusInternalServerError, dto.WriteResponse(err.Code, err.Message, nil, err.Error))
+			response.JSON(err.Code, dto.WriteResponse(err.Code, err.Message, nil, err.Error))
 			return
 		} else {
 			response.JSON(http.StatusOK,dto.WriteResponse(http.StatusOK,"OK",loginResponse,nil))

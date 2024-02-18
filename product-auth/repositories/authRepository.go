@@ -12,8 +12,8 @@ import (
 )
 
 type AuthRepository interface {
-	FindByUsernameAndPassword(ctx context.Context, username string, password string) (*domain.Login, *errs.AppError)
-    GenerateAndSaveRefreshTokenToStore(ctx context.Context, authToken domain.AuthToken) (string, *errs.AppError)
+	FindByEmailAndPassword(ctx context.Context, email string, password string) (*domain.Login, *errs.AppError)
+    GenerateAndSaveRefreshTokenToStore(ctx context.Context, authToken domain.AuthToken, customerId domain.AccessTokenClaims) (string, *errs.AppError)
 	RefreshTokenExists(ctx context.Context, refreshToken string) *errs.AppError 
 }
 
@@ -21,10 +21,10 @@ type AuthRepositoryDb struct {
 	client *sqlx.DB
 }
 
-func (d AuthRepositoryDb) FindByUsernameAndPassword(ctx context.Context, username string, password string) (*domain.Login, *errs.AppError) {
+func (d AuthRepositoryDb) FindByEmailAndPassword(ctx context.Context, email string, password string) (*domain.Login, *errs.AppError) {
 	var login domain.Login
-	sqlVerify := `SELECT customers_id, username, role, age, address, gender FROM customers WHERE username = $1 AND password = $2`
-	err := d.client.GetContext(ctx, &login, sqlVerify, username, password)
+	sqlVerify := `SELECT customers_id, username, role, age, address, gender FROM customers WHERE email = $1 AND password = $2`
+	err := d.client.GetContext(ctx, &login, sqlVerify, email, password)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, errs.NewAuthenticationError("invalid credentials", err)
@@ -52,15 +52,15 @@ func (d AuthRepositoryDb) RefreshTokenExists(ctx context.Context, refreshToken s
 	return nil
 }  
 
-func (d AuthRepositoryDb) GenerateAndSaveRefreshTokenToStore(ctx context.Context, authToken domain.AuthToken) (string, *errs.AppError) {
+func (d AuthRepositoryDb) GenerateAndSaveRefreshTokenToStore(ctx context.Context, authToken domain.AuthToken, claims domain.AccessTokenClaims) (string, *errs.AppError) {
 	var appErr *errs.AppError 
 	var refreshToken string 
 	if refreshToken, appErr = authToken.NewRefreshToken(); appErr != nil {
 		return "", appErr 
 	}
 	fmt.Println(refreshToken)
-	sqlInsert := "INSERT INTO refresh_token_store (refresh_token) VALUES ($1)"
-	_, err := d.client.ExecContext(ctx, sqlInsert, refreshToken)
+	sqlInsert := "INSERT INTO refresh_token_store (refresh_token, customers_id) VALUES ($1, $2)"
+	_, err := d.client.ExecContext(ctx, sqlInsert, refreshToken, claims.CustomersId)
     if err != nil {
 		fmt.Println(err)
 		logger.Error("unexpected database error: " + err.Error())

@@ -46,7 +46,7 @@ func (s DefaultAuthService) Login(ctx context.Context, req *dto.LoginRequest) (*
 	var err *errs.AppError
 	var login *domain.Login
 
-	if login, err = s.repo.FindByUsernameAndPassword(ctx, req.Username, req.Password); err != nil {
+	if login, err = s.repo.FindByEmailAndPassword(ctx, req.Email, req.Password); err != nil {
 		return nil, err
 	}
 
@@ -59,7 +59,7 @@ func (s DefaultAuthService) Login(ctx context.Context, req *dto.LoginRequest) (*
 		return nil, err
 	}
 
-	if refreshToken, err = s.repo.GenerateAndSaveRefreshTokenToStore(ctx, authToken); err != nil {
+	if refreshToken, err = s.repo.GenerateAndSaveRefreshTokenToStore(ctx, authToken, claims); err != nil {
 		return nil, err 
 	}
 
