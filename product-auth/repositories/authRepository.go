@@ -13,7 +13,7 @@ import (
 
 type AuthRepository interface {
 	FindByUsernameAndPassword(ctx context.Context, username string, password string) (*domain.Login, *errs.AppError)
-    GenerateAndSaveRefreshTokenToStore(ctx context.Context, authToken domain.AuthToken) (string, *errs.AppError)
+    GenerateAndSaveRefreshTokenToStore(ctx context.Context, authToken domain.AuthToken, customer_id string) (string, *errs.AppError)
 	RefreshTokenExists(ctx context.Context, refreshToken string) *errs.AppError 
 }
 
@@ -52,15 +52,15 @@ func (d AuthRepositoryDb) RefreshTokenExists(ctx context.Context, refreshToken s
 	return nil
 }  
 
-func (d AuthRepositoryDb) GenerateAndSaveRefreshTokenToStore(ctx context.Context, authToken domain.AuthToken) (string, *errs.AppError) {
+func (d AuthRepositoryDb) GenerateAndSaveRefreshTokenToStore(ctx context.Context, authToken domain.AuthToken, customer_id string) (string, *errs.AppError) {
 	var appErr *errs.AppError 
 	var refreshToken string 
 	if refreshToken, appErr = authToken.NewRefreshToken(); appErr != nil {
 		return "", appErr 
 	}
 	fmt.Println(refreshToken)
-	sqlInsert := "INSERT INTO refresh_token_store (refresh_token) VALUES ($1)"
-	_, err := d.client.ExecContext(ctx, sqlInsert, refreshToken)
+	sqlInsert := "INSERT INTO refresh_token_store (refresh_token, customers_id) VALUES ($1, $2)"
+	_, err := d.client.ExecContext(ctx, sqlInsert, refreshToken, customer_id)
     if err != nil {
 		fmt.Println(err)
 		logger.Error("unexpected database error: " + err.Error())

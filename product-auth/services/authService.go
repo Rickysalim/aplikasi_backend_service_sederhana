@@ -59,7 +59,7 @@ func (s DefaultAuthService) Login(ctx context.Context, req *dto.LoginRequest) (*
 		return nil, err
 	}
 
-	if refreshToken, err = s.repo.GenerateAndSaveRefreshTokenToStore(ctx, authToken); err != nil {
+	if refreshToken, err = s.repo.GenerateAndSaveRefreshTokenToStore(ctx, authToken, claims.CustomersId); err != nil {
 		return nil, err 
 	}
 
