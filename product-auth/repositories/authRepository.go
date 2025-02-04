@@ -12,7 +12,7 @@ import (
 )
 
 type AuthRepository interface {
-	FindByUsernameAndPassword(ctx context.Context, username string, password string) (*domain.Login, *errs.AppError)
+	FindByEmailAndPassword(ctx context.Context, email string, password string) (*domain.Login, *errs.AppError)
     GenerateAndSaveRefreshTokenToStore(ctx context.Context, authToken domain.AuthToken, customer_id string) (string, *errs.AppError)
 	RefreshTokenExists(ctx context.Context, refreshToken string) *errs.AppError 
 }
@@ -52,11 +52,7 @@ func (d AuthRepositoryDb) RefreshTokenExists(ctx context.Context, refreshToken s
 	return nil
 }  
 
-<<<<<<< HEAD
 func (d AuthRepositoryDb) GenerateAndSaveRefreshTokenToStore(ctx context.Context, authToken domain.AuthToken, customer_id string) (string, *errs.AppError) {
-=======
-func (d AuthRepositoryDb) GenerateAndSaveRefreshTokenToStore(ctx context.Context, authToken domain.AuthToken, claims domain.AccessTokenClaims) (string, *errs.AppError) {
->>>>>>> 4e6c5d0f9f51aad147517bd831c7187f2a4b6ed0
 	var appErr *errs.AppError 
 	var refreshToken string 
 	if refreshToken, appErr = authToken.NewRefreshToken(); appErr != nil {
@@ -64,11 +60,7 @@ func (d AuthRepositoryDb) GenerateAndSaveRefreshTokenToStore(ctx context.Context
 	}
 	fmt.Println(refreshToken)
 	sqlInsert := "INSERT INTO refresh_token_store (refresh_token, customers_id) VALUES ($1, $2)"
-<<<<<<< HEAD
 	_, err := d.client.ExecContext(ctx, sqlInsert, refreshToken, customer_id)
-=======
-	_, err := d.client.ExecContext(ctx, sqlInsert, refreshToken, claims.CustomersId)
->>>>>>> 4e6c5d0f9f51aad147517bd831c7187f2a4b6ed0
     if err != nil {
 		fmt.Println(err)
 		logger.Error("unexpected database error: " + err.Error())

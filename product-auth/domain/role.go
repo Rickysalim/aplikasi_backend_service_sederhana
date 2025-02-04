@@ -22,6 +22,7 @@ func (p RolePermissions) IsAuthorizedFor(role string, routeName string) error {
 func GetRolePermissions() RolePermissions {
 	return RolePermissions{map[string][]string{
 		"admin": {"/v1/products","/v1/products/:product_id"},
-		"user": {"/v1/products","/v1/products/:product_id"},
+		// "user": {"/v1/products","/v1/products/:product_id"},
+		"user": {"/v1/products"},
 	}}
 }

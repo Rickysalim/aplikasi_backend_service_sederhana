@@ -16,7 +16,6 @@ type AuthService interface {
 	Login(ctx context.Context, req *dto.LoginRequest) (*dto.LoginResponse, *errs.AppError)
 	Verify(ctx context.Context, urlParams map[string]string) *errs.AppError
     Refresh(ctx context.Context, request dto.RefreshTokenRequest) (*dto.LoginResponse, *errs.AppError)
-
 }
 
 type DefaultAuthService struct {
